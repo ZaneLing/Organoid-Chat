@@ -1,0 +1,30 @@
+{
+  "name": "chat-ustc",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@headlessui/vue": "^1.7.22",
+    "@heroicons/vue": "^2.1.5",
+    "@tailwindcss/forms": "^0.5.7",
+    "axios": "^1.7.4",
+    "llamaai": "^1.0.4",
+    "marked": "^14.1.0",
+    "vue": "^3.4.31",
+    "vue-router": "next",
+    "vue-toastification": "next",
+    "vuex": "^4.1.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.5",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.39",
+    "tailwindcss": "^3.4.6",
+    "vite": "^5.3.4"
+  }
+}
