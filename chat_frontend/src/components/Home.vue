@@ -20,9 +20,11 @@
             </div>
 
             <!--title-->
-            <div
-                class="flex w-full h-40 pt-10 text-blue-800 text-7xl bg-blue-300 justify-center items-center font-semibold">
-                Organoid Chat
+            <div class="flex w-full h-48 pt-5 bg-blue-300 justify-center items-center font-semibold">
+                <div class="flex justify-center h-40 rounded-lg">
+                    <img class="rounded-full" src="../assets/OC-logo.jpg" alt="oclogo">
+                </div>
+                
             </div>
 
             <!--list-->
@@ -67,7 +69,7 @@ const goToChat = (id) => {
     }
     else if (id == '3') {
         router.push({
-            path: '/base/chat',
+            path: '/base/start',
         });
     }
 };

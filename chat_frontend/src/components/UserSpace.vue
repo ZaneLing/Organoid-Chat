@@ -21,6 +21,7 @@
             <thead class="text-blue-900 text-2xl">
               <tr>
                 <th>File Name</th>
+                <th>Within Conversation</th>
                 <th>File Type</th>
                 <th>File Size</th>
                 <th>Open</th>
@@ -30,6 +31,7 @@
             <tbody>
               <tr v-for="file in userFiles" :key="file.id" class="text-center text-gray-200 gap-5 h-10">
                 <td>{{ file.filename }}</td>
+                <td>{{ file.file_conversation }}</td>
                 <td>{{ file.file_format }}</td>
                 <td>{{ (file.file_size / 1024).toFixed(2) }} KB</td>
                 <td class="pl-16">
@@ -58,6 +60,8 @@ import { getCurrentInstance } from 'vue';
 const { proxy } = getCurrentInstance();  // 获取实例代理
 
 const username = localStorage.getItem('username');
+import { useRouter } from 'vue-router';
+
 
 const userFiles = ref([]);
 
@@ -70,6 +74,7 @@ const fetchUserFiles = async () => {
         'Content-Type': 'application/json'
       }
     });
+    console.log(response.data.files);
     userFiles.value = response.data.files;
   } catch (error) {
     console.error('Failed to fetch user files:', error);
@@ -102,7 +107,6 @@ const deleteFile = async (fileId) => {
 };
 
 const openFile = async (fileId, fileFormat) => {
-
   try {
     if (fileFormat.toLowerCase() !== 'pdf') {
       toastOpenErrorMethod();
@@ -199,7 +203,7 @@ const handleFileUpload = async (event) => {
   });
 
   formData.append('username', username);
-
+  console.log(formData.value);
   try {
     // Send files to the server
     const response = await axios.post(`${proxy.$apiBaseUrl}/api/upload/`, formData, {
@@ -220,7 +224,10 @@ const handleFileUpload = async (event) => {
 
 
 const ToSign = () => {
-  router.push('/api/login');
+  localStorage.removeItem('username');
+  router.push({
+            path: '/base/chat',
+        });
 };
 
 </script>

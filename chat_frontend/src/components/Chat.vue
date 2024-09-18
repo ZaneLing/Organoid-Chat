@@ -92,9 +92,6 @@ const scrollToBottom = () => {
         chatContainer.value.scrollTop = chatContainer.value.scrollHeight;
     }
 };
-const renderMD = (text) => {
-    return marked(text);
-};
 
 import {
     UserIcon,
@@ -115,38 +112,22 @@ const handleKeyDown = (event) => {
     }
 };
 
-const homeInput = ref('');
-onMounted(() => {
-    const homeMessage = route.query.homeMessage;
-    if (homeMessage) {
-        homeInput.value = homeMessage;
-    }
-
-});
-
+const conversation = ref([]);
 
 const sendMessage = async () => {
     if (userInput.value.trim() === '') return;
+    console.log(userInput.value);
 
-    console.log(homeInput);
-    let userMessage ='';
+    let userMessage = '';
 
-    if (homeInput.value !== '') {
-        messages.value.push({
-            text: homeInput.value,
-            isUser: true
-        });
-        userMessage.value = homeInput.value;
-        homeInput.value = '';
-    }
-    else {
-        messages.value.push({
-            text: userInput.value,
-            isUser: true
-        });
-        userMessage = userInput.value;
-        userInput.value = '';
-    }
+    messages.value.push({
+        text: userInput.value,
+        isUser: true
+    });
+    userMessage = userInput.value;
+    conversation.value.push(userMessage);
+    userInput.value = '';
+
     const apiRequestJson = {
         messages: [{ role: 'user', content: userMessage }],
         stream: false,
@@ -158,10 +139,13 @@ const sendMessage = async () => {
 
         const llamaResponse = response.choices[0].message.content;
         console.log(response);
+        console.log(llamaResponse);
         messages.value.push({
             text: llamaResponse,
             isUser: false
         });
+        conversation.value.push(llamaResponse);
+        console.log(conversation.value);
         scrollToBottom();
     } catch (error) {
         console.error('Error during OpenAI API request:', error);
@@ -172,6 +156,7 @@ const sendMessage = async () => {
     }
     scrollToBottom();
 };
+
 
 
 
@@ -190,20 +175,20 @@ const handleFileUpload = (event) => {
 const toast = useToast();
 const toastSuccessMethod = () => {
     toast.info("Upload successfully", {
-    position: "top-right",
-    timeout: 1500,
-    closeOnClick: true,
-    icon: true,
-});
+        position: "top-right",
+        timeout: 1500,
+        closeOnClick: true,
+        icon: true,
+    });
 };
 
 const toastErrorMethod = () => {
     toast.error("Upload failed", {
-    position: "top-right",
-    timeout: 4000,
-    closeOnClick: true,
-    icon: true,
-});
+        position: "top-right",
+        timeout: 4000,
+        closeOnClick: true,
+        icon: true,
+    });
 };
 
 // Upload file to the backend and save the file name in the db
@@ -222,8 +207,8 @@ const uploadFile = async () => {
         });
 
         console.log(formData);
-        
-        
+
+
         const response = await axios.post(`${proxy.$apiBaseUrl}/api/upload/`, formData, {
             headers: {
                 'Authorization': `Bearer ${authToken}`,

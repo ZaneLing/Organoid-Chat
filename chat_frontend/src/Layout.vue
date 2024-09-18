@@ -24,12 +24,13 @@
                             </ul>
                         </li>
                         
+
                         <li class="-mx-6 mt-auto">
                             <a href="/base/settings"
                                 class="flex items-center gap-x-4 px-6 py-3 text-sm font-semibold leading-6 text-white hover:text-blue-500 hover:bg-white hover:rounded-md">
                                 <UserCircleIcon class="h-8 w-8 rounded-full bg-blue-700" />
-                                
-                                <span aria-hidden="true">{{username || 'Guest'}}</span>
+
+                                <span aria-hidden="true">{{ username || 'Guest' }}</span>
                             </a>
                         </li>
                     </ul>
@@ -51,7 +52,7 @@ import { ref, onMounted } from 'vue';
 
 const username = ref('');
 
-onMounted(()=>{
+onMounted(() => {
     username.value = localStorage.getItem('username');
 })
 
@@ -63,11 +64,12 @@ function setActiveItem(selectedIndex) {
 
 const navigation = [
     { name: 'Home', href: '/base/home', icon: ServerIcon, current: false },
-    { name: 'New chat', href: '/base/chat', icon: ChatBubbleBottomCenterTextIcon, current: false },
+    { name: 'Start Chat', href: '/base/start', icon: ChatBubbleBottomCenterTextIcon, current: false },
+    //{ name: 'New chat', href: '/base/chat', icon: ChatBubbleBottomCenterTextIcon, current: false },
     { name: 'Userspace', href: '/base/userspace', icon: FolderIcon, current: false },
     { name: 'Knowledge Graph', href: '/base/kg', icon: SignalIcon, current: false },
     { name: 'History', href: '/base/history', icon: ChatBubbleLeftEllipsisIcon, current: false },
-    { name: 'Settings', href: '/base/settings', icon: Cog6ToothIcon, current: false },
+    { name: 'Settings', href: '/base/settings', icon: Cog6ToothIcon, current: false }
 ]
 
 import { ChatBubbleLeftEllipsisIcon } from "@heroicons/vue/24/outline";
@@ -81,5 +83,7 @@ import {
     UserCircleIcon,
     ChatBubbleBottomCenterTextIcon
 } from '@heroicons/vue/24/outline'
+
+
 
 </script>

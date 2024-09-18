@@ -8,6 +8,8 @@ import Settings from '../components/Settings.vue';
 import Chat from '../components/Chat.vue';
 import KnowledgeGraph from '../components/KnowledgeGraph.vue';
 import History from '../components/History.vue';
+import Start from '../components/Start.vue';
+import Conversation from '../components/Conversation.vue';
 
 const routes = [
     {
@@ -27,6 +29,10 @@ const routes = [
       component: Layout,
       children:[
         {
+          path: 'conversation/:conversation_title',
+          component: Conversation,
+        },
+        {
             path: 'home',
             component: Home,
         },
@@ -40,7 +46,11 @@ const routes = [
         },
         {
           path: 'chat',
-          component: Chat
+          component: Chat,
+        },
+        {
+          path: 'start',
+          component: Start
         },
         {
           path: 'kg',

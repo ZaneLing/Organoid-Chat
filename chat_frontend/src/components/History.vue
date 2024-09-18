@@ -16,22 +16,21 @@
             <table class="min-w-full table-fixed divide-y text-center divide-gray-300 bg-blue-400">
               <thead class="text-blue-900 text-2xl">
                 <tr>
-                  <th>Chat Title</th>
-                  <th>Link Files</th>
+                  <th>Chat id</th>
+                  <th>Chat title</th>
                   <th>Open</th>
                   <th>Delete</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="file in userFiles" :key="file.id" class="text-center text-gray-200 gap-5 h-10">
-                  <td>{{ file.filename }}</td>
-                  <td>{{ file.file_format }}</td>
-                  <td>{{ (file.file_size / 1024).toFixed(2) }} KB</td>
+                <tr v-for="conversation in userConversations" :key="conversation.id" class="text-center text-gray-200 gap-5 h-10">
+                  <td>{{ conversation.id }}</td>
+                  <td>{{ conversation.title }}</td>
                   <td class="pl-16">
-                    <BookOpenIcon class="flex h-6 w-6 rounded-full bg-green-800 text-white" @click="openFile(file.id, file.file_format)" />
+                    <BookOpenIcon class="flex h-6 w-6 rounded-full bg-green-800 text-white" @click="openConversation(conversation.title)" />
                   </td>
                   <td class="pl-16">
-                    <XCircleIcon class="flex h-6 w-6 rounded-full bg-red-800 text-white" @click="deleteFile(file.id)" />
+                    <XCircleIcon class="flex h-6 w-6 rounded-full bg-red-800 text-white" @click="DeleteConversation(conversation.title)"/>
                   </td>
                 </tr>
               </tbody>
@@ -55,72 +54,58 @@ const { proxy } = getCurrentInstance();  // 获取实例代理
   const username = localStorage.getItem('username');
   
   const userFiles = ref([]);
-  
-  const fetchUserFiles = async () => {
+  const userConversations = ref([]); 
+  const fetchUserConversations = async () => {
     try {
-      const response = await axios.post((`${proxy.$apiBaseUrl}/api/filespace/`), {
+      const response = await axios.post(`${proxy.$apiBaseUrl}/api/getuserconversations/`, {
         user: username
       }, {
         headers: {
           'Content-Type': 'application/json'
         }
       });
-      userFiles.value = response.data.files;
+      userConversations.value = response.data.conversations;
     } catch (error) {
       console.error('Failed to fetch user files:', error);
       toastLoginErrorMethod();
-      setTimeout(() => {
-        router.push('/api/login');
-      }, 3000);
-    }
-  };
+    };
+  }
   
   onMounted(() => {
-    fetchUserFiles();
+    fetchUserConversations();
   });
-  
-  const deleteFile = async (fileId) => {
+
+  const DeleteConversation = async (conversationTitle) => {
+    console.log('delete conversation title:');
+    console.log(conversationTitle);
     try {
-      const response = await axios.post(`${proxy.$apiBaseUrl}/api/deletefile/`, {
-        id: fileId
+      const response = await axios.post(`${proxy.$apiBaseUrl}/api/deleteconversation/`, {
+        conversation_title: conversationTitle,
       }, {
         headers: {
           'Content-Type': 'application/json'
         }
       });
-      toastDeleteMethod();
-      fetchUserFiles();
+      
+      toastDeleteSuccessMethod();
+      fetchUserConversations();
+      console.log(response.data);
     } catch (error) {
       console.error('Error deleting file:', error);
-      toastErrorMethod();
+      toastDeleteErrorMethod();
     }
   };
   
-  const openFile = async (fileId, fileFormat) => {
-  
-    try {
-      if (fileFormat.toLowerCase() !== 'pdf') {
-        toastOpenErrorMethod();
-        return; // 直接返回，不继续执行删除操作
-      }
-  
-      const url = `${proxy.$apiBaseUrl}/api/openfile/${fileId}/`;
-      toastOpenMethod();
-      setTimeout(() => {
-        window.open(url, '_blank');
-      }, 1500);
-    } catch (error) {
-      console.log(error);
-      console.error('Error opening file:', error);
-      toastOpenErrorMethod();
-    }
-  };
+const openConversation = (conversationTitle) => {
+  localStorage.setItem('conversationTitle', conversationTitle);
+    router.push(`/base/conversation/${conversationTitle}`); 
+};
   
   const fileInput = ref(null);
   
   
   const toast = useToast();
-  const toastDeleteMethod = () => {
+  const toastDeleteSuccessMethod = () => {
       toast.info("Delete successfully", {
       position: "top-center",
       timeout: 1500,
@@ -162,8 +147,8 @@ const { proxy } = getCurrentInstance();  // 获取实例代理
   });
   };
   
-  const toastErrorMethod = () => {
-      toast.error("Upload failed", {
+  const toastDeleteErrorMethod = () => {
+      toast.error("Delete failed", {
       position: "top-center",
       timeout: 1500,
       closeOnClick: true,
@@ -217,5 +202,5 @@ const { proxy } = getCurrentInstance();  // 获取实例代理
   const ToSign = () => {
     router.push('/api/login');
   };
-  
+
   </script>

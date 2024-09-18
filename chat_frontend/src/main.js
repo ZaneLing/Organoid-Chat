@@ -7,7 +7,8 @@ import "./vue-toastification/dist/index.css"
 
 const app = createApp(App)
 
-app.config.globalProperties.$apiBaseUrl = 'http://127.0.0.1:8000';//local
-//app.config.globalProperties.$apiBaseUrl = 'http://172.16.120.14:8081';//server
+//app.config.globalProperties.$apiBaseUrl = 'http://127.0.0.1:8000';//local
+app.config.globalProperties.$apiBaseUrl = 'http://172.16.120.14:8081';//server
+app.config.globalProperties.$apiFastapiUrl = 'http://172.16.120.14:8091';//fastapibackendserver 
 
 app.use(router).use(Toast).mount('#app')
