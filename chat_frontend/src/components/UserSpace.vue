@@ -8,9 +8,9 @@
         <button @click="ToSign" type="button"
           class="block rounded-md items-center justify-center bg-indigo-600 px-3 py-1 text-center text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Change
           User</button>
-        <button @click="triggerFileInput"
+        <!-- <button @click="triggerFileInput"
           class="block rounded-md items-center justify-center bg-indigo-600 px-3 py-1 text-center text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-          Add File</button>
+          Add File</button> -->
         <input ref="fileInput" type="file" multiple @change="handleFileUpload" class="hidden" />
       </div>
     </div>
@@ -81,7 +81,7 @@ const fetchUserFiles = async () => {
     toastLoginErrorMethod();
     setTimeout(() => {
       router.push('/api/login');
-    }, 3000);
+    }, 2000);
   }
 };
 
@@ -226,7 +226,7 @@ const handleFileUpload = async (event) => {
 const ToSign = () => {
   localStorage.removeItem('username');
   router.push({
-            path: '/base/chat',
+            path: '/api/login',
         });
 };
 

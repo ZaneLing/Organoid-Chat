@@ -17,6 +17,7 @@
               <thead class="text-blue-900 text-2xl">
                 <tr>
                   <th>Chat id</th>
+                  <th>ID number</th>
                   <th>Chat title</th>
                   <th>Open</th>
                   <th>Delete</th>
@@ -25,6 +26,7 @@
               <tbody>
                 <tr v-for="conversation in userConversations" :key="conversation.id" class="text-center text-gray-200 gap-5 h-10">
                   <td>{{ conversation.id }}</td>
+                  <td>{{ conversation.ID }}</td>
                   <td>{{ conversation.title }}</td>
                   <td class="pl-16">
                     <BookOpenIcon class="flex h-6 w-6 rounded-full bg-green-800 text-white" @click="openConversation(conversation.title)" />
@@ -68,6 +70,9 @@ const { proxy } = getCurrentInstance();  // 获取实例代理
     } catch (error) {
       console.error('Failed to fetch user files:', error);
       toastLoginErrorMethod();
+      setTimeout(() => {
+        router.push('/api/login');
+      }, 2000);
     };
   }
   
@@ -200,6 +205,7 @@ const openConversation = (conversationTitle) => {
   
   
   const ToSign = () => {
+    localStorage.removeItem('username');
     router.push('/api/login');
   };
 

@@ -352,10 +352,12 @@ def get_user_conversations(request):
         try:
             data = json.loads(request.body)
             username = data.get('user')
+            print(username)
             user = User.objects.get(username=username)
             conversations = ConversationModel.objects.filter(user=user)
             conversation_data = [{
                     'id': conversation.conversation_id,
+                    'ID': conversation.id,
                     'title': conversation.conversation_title,
             } for conversation in conversations]
             return JsonResponse({'conversations': conversation_data})
@@ -398,8 +400,8 @@ def get_conversation_messages(request):
             print("get messages:")
             conversation_title = data.get('conversation_title')
             print("title:", conversation_title)
-            # username = data.get('username')
-            # user = User.objects.get(username=username)
+            username = data.get('username')
+            user = User.objects.get(username=username)
             conversation = ConversationModel.objects.get(conversation_title=conversation_title)
             print("conversation:", conversation)
             messages = MessageModel.objects.filter(conversation=conversation).values('message_content', 'message_role')
