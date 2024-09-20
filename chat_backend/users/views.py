@@ -52,31 +52,39 @@ def login_view(request):
 def upload_user_file(request):
     print(request.FILES)
     if request.method == 'POST':
-        if 'files' not in request.FILES:
-            return JsonResponse({'error': 'No files uploaded'}, status=400)
+        try:
+            if 'files' not in request.FILES:
+                return JsonResponse({'error': 'No files uploaded'}, status=400)
 
-        username = request.POST.get('username')
-        conversationTitle = request.POST.get('conversationTitle')
-        files = request.FILES.getlist('files')
+            username = request.POST.get('username')
+            conversationID = request.POST.get('conversationId')
+            print(username)
+            print(conversationID)
+            conversationTitle = request.POST.get('conversationTitle')
+            print(conversationTitle)
+            files = request.FILES.getlist('files')
 
-        conversation = ConversationModel.objects.get(conversation_title=conversationTitle)
-        user = get_object_or_404(User, username=username)
-        # Save file to the user's file space
-        for file in files:   
+            conversation = ConversationModel.objects.get(id=conversationID)
+            print(conversation)
+            user = get_object_or_404(User, username=username)
+            # Save file to the user's file space
+            for file in files:   
 
-            print(file.name)
+                print(file.name)
 
-            user_file = FileModel.objects.create(
-                file=file,
-                conversation = conversation,
-                filename=file.name,
-                file_size=file.size,
-                file_format=file.content_type,
-                user=user
-            )
-            user_file.save()
+                user_file = FileModel.objects.create(
+                    file=file,
+                    conversation = conversation,
+                    filename=file.name,
+                    file_size=file.size,
+                    file_format=file.content_type,
+                    user=user
+                )
+                user_file.save()
 
-        return JsonResponse({'message': 'Files uploaded successfully'}, status=201)
+            return JsonResponse({'message': 'Files uploaded successfully'}, status=201)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
     else:
         return JsonResponse({'error': 'Method not allowed'}, status=405)
 
@@ -212,17 +220,16 @@ def create_message(request):
         try:
             # 解析请求数据
             data = json.loads(request.body)
-            conversation_title = data.get('conversation_title')
+            conversationId = data.get('conversationId')
             message_content = data.get('message_content')
             message_role = data.get('message_role')
-            print(conversation_title)
-            print(1111111)
+            
             print(message_content)
             print(message_role)
-            if not conversation_title or not message_content:
+            if not conversationId or not message_content:
                 return JsonResponse({'error': 'Conversation title and message content are required'}, status=400)
             
-            conversation = ConversationModel.objects.get(conversation_title=conversation_title)
+            conversation = ConversationModel.objects.get(id=conversationId)
 
             # 创建 MessageModel 实例
             message = MessageModel.objects.create(
@@ -275,7 +282,7 @@ def create_conversation(request):
 
             return JsonResponse({
                 'message': 'Conversation created successfully',
-                'conversation_id': conversation.conversation_id,
+                'conversation_id': conversation.id,
                 'conversation_title': conversation.conversation_title
             }, status=201)
 
@@ -327,9 +334,9 @@ def get_conversation_file(request):
         try:
             data = json.loads(request.body)
             username = data.get('username')
-            conversation_title = data.get('conversationTitle')
-            
-            conversation = ConversationModel.objects.get(conversation_title=conversation_title)
+            conversationId = data.get('conversationId')
+            print("getfileid:",conversationId)
+            conversation = ConversationModel.objects.get(id=conversationId)
             user = User.objects.get(username=username)
             
             files = FileModel.objects.filter(conversation=conversation, user=user)
@@ -372,9 +379,9 @@ def delete_conversation(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            conversation_title = data.get('conversation_title')
-            print(conversation_title)
-            conversation = ConversationModel.objects.filter(conversation_title=conversation_title)
+            conversation_id = data.get('conversationId')
+            print(conversation_id)
+            conversation = ConversationModel.objects.filter(id=conversation_id)
             conversation.delete()
             return JsonResponse({'message': 'Conversation deleted successfully'})
         except Exception as e:
@@ -397,19 +404,18 @@ def get_conversation_messages(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            print("get messages:")
-            conversation_title = data.get('conversation_title')
-            print("title:", conversation_title)
+            conversationId = data.get('conversationId')
+            
             username = data.get('username')
             user = User.objects.get(username=username)
-            conversation = ConversationModel.objects.get(conversation_title=conversation_title)
-            print("conversation:", conversation)
+            conversation = ConversationModel.objects.get(id=conversationId)
+         
             messages = MessageModel.objects.filter(conversation=conversation).values('message_content', 'message_role')
             messages_list = list(messages)
-            print(1111)
-            print(messages_list)
+         
+            # print(messages_list)
 
             return JsonResponse(messages_list, safe=False)
-        except:
-            return JsonResponse({'error': 'Invalid request'}, status=401)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=401)
         

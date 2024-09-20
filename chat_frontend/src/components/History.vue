@@ -29,10 +29,10 @@
                   <td>{{ conversation.ID }}</td>
                   <td>{{ conversation.title }}</td>
                   <td class="pl-16">
-                    <BookOpenIcon class="flex h-6 w-6 rounded-full bg-green-800 text-white" @click="openConversation(conversation.title)" />
+                    <BookOpenIcon class="flex h-6 w-6 rounded-full bg-green-800 text-white" @click="openConversation(conversation.title, conversation.ID)" />
                   </td>
                   <td class="pl-16">
-                    <XCircleIcon class="flex h-6 w-6 rounded-full bg-red-800 text-white" @click="DeleteConversation(conversation.title)"/>
+                    <XCircleIcon class="flex h-6 w-6 rounded-full bg-red-800 text-white" @click="DeleteConversation(conversation.ID)"/>
                   </td>
                 </tr>
               </tbody>
@@ -80,12 +80,12 @@ const { proxy } = getCurrentInstance();  // 获取实例代理
     fetchUserConversations();
   });
 
-  const DeleteConversation = async (conversationTitle) => {
+  const DeleteConversation = async (conversationId) => {
     console.log('delete conversation title:');
-    console.log(conversationTitle);
+    console.log(conversationId);
     try {
       const response = await axios.post(`${proxy.$apiBaseUrl}/api/deleteconversation/`, {
-        conversation_title: conversationTitle,
+        conversationId: conversationId,
       }, {
         headers: {
           'Content-Type': 'application/json'
@@ -101,8 +101,9 @@ const { proxy } = getCurrentInstance();  // 获取实例代理
     }
   };
   
-const openConversation = (conversationTitle) => {
+const openConversation = (conversationTitle, conversationId) => {
   localStorage.setItem('conversationTitle', conversationTitle);
+  localStorage.setItem('conversationId', conversationId);
     router.push(`/base/conversation/${conversationTitle}`); 
 };
   

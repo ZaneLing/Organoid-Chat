@@ -95,9 +95,9 @@ import { useToast } from 'vue-toastification';
 import { marked } from 'marked';
 import { useRoute } from 'vue-router';
 import { getCurrentInstance } from 'vue';
+import { XCircleIcon, BookOpenIcon } from "@heroicons/vue/24/outline";
 const { proxy } = getCurrentInstance();  // 获取实例代理
-const route = useRoute();
-const conversationId = ref(''); // 获取动态 conversation_id
+const route = useRoute();// 获取动态 conversation_id
 const conversationTitle = ref(route.params.conversation_title);
 const chatContainer = ref(null);
 const scrollToBottom = () => {
@@ -220,7 +220,7 @@ const sendMessageToLLM = () => {
 const loadConversationMessages = async () => {
     try {
         const response = await axios.post(`${proxy.$apiBaseUrl}/api/getconversationmessages/`, {
-            conversation_title: localStorage.getItem('conversationTitle'),
+            conversationId: localStorage.getItem('conversationId'),
             username: localStorage.getItem('username')
         });
         console.log(response.data);
@@ -235,7 +235,7 @@ const loadConversationMessages = async () => {
 const createMessage = async (messageContent, messageRole) => {
     try {
         const response = await axios.post(`${proxy.$apiBaseUrl}/api/createmessage/`, {
-            conversation_title: conversationTitle.value,
+            conversationId: localStorage.getItem('conversationId'),
             message_role: messageRole,
             message_content: messageContent
         });
@@ -335,11 +335,16 @@ const selectedFiles = ref([]);
 // 处理文件选择，将文件发给llm之后保存向量数据库
 const handleFileUpload = (event) => {
     //file.value = event.target.files[0];
-    console.log(selectedFiles.value);
+    
     selectedFiles.value = Array.from(event.target.files);
     console.log('Uploaded file:', selectedFiles);
     const username = localStorage.getItem('username');
     const conversationTitle = localStorage.getItem('conversationTitle');
+    const conversationId = localStorage.getItem('conversationId');
+    console.log('username:', username);
+    console.log('conversationTitle:', conversationTitle);
+    console.log('conversationId:', conversationId);
+
     // 使用FormData对象来构建文件上传的请求
     const formData = new FormData();
     //formData.append('file',file)
@@ -348,7 +353,7 @@ const handleFileUpload = (event) => {
     });
     formData.append('username', username);
     formData.append('conversationTitle', conversationTitle);
-    console.log(formData);
+    formData.append('conversationId', conversationId);
 
     axios.post(`${proxy.$apiBaseUrl}/api/upload/`, formData)
         .then(function (response) {
@@ -437,7 +442,7 @@ const UploadMessgaeToConversation = (messageRole) => {
     console.log(userInput.value)
     try {
         const response = axios.post(`${proxy.$apiBaseUrl}/api/createmessage`, {
-            conversation_title: localStorage.getItem('conversation_title'),
+            conversationId: localStorage.getItem('conversationId'),
             message_content: userInput.value,
             message_role: messageRole,
         });
@@ -454,9 +459,12 @@ onMounted(() => {
 
 const getConversationFiles = async () => {
     try {
+        const conversationId = localStorage.getItem('conversationId');
+        console.log("id:", conversationId)
+        console.log("title:", conversationTitle)
         const response = await axios.post(`${proxy.$apiBaseUrl}/api/getconversationfile/`, {
             username: localStorage.getItem('username'),
-            conversationTitle: localStorage.getItem('conversationTitle')
+            conversationId: localStorage.getItem('conversationId')
         }, {
             headers: {
                 'Content-Type': 'application/json',
@@ -464,7 +472,7 @@ const getConversationFiles = async () => {
         });
         console.log(response.data);
         conversationFiles.value = response.data.files;
-        console.log(conversationFiles);
+        console.log("files:",conversationFiles);
     } catch (error) {
         console.log(error);
     }

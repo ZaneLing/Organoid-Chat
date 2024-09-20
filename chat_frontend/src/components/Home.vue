@@ -74,14 +74,7 @@ const goToChat = (id) => {
     }
 };
 
-
-
 import { ref } from 'vue'
-
-import {
-    PaperClipIcon,
-    PaperAirplaneIcon,
-} from '@heroicons/vue/24/outline'
 
 const questions = ref([
     {

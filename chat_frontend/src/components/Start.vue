@@ -26,7 +26,7 @@
                                             class="hidden" />
                                     </div>
                                     <div class="w-auto h-full items-center justify-center pr-3">
-                                        <button @click="async () => {CreateConversation();HandleUploadedFiles();}">
+                                        <button @click="handleClickTwoSteps">
                                             <PaperAirplaneIcon
                                                 class="w-8 h-8 rounded-lg text-blue-900 cursor-pointer hover:bg-indigo-100" />
                                         </button>
@@ -40,11 +40,12 @@
                         <ul class="list-none flex flex-col pl-2 rouned-full">
                             <li v-for="(file, index) in selectedFiles" :key="index"
                                 class="bg-white gap-1 text-blue-400 rounded-3xl">
-                                <div class="flex py-2 h-10 px-2 w-auto gap-1">
+                                <div class="flex py-1 h-10 px-2 w-auto gap-1">
                                     <DocumentIcon v-if="file.type === 'application/pdf'"
                                         class="rounded-full h-6 w-6 px-1 bg-red-200 text-white" />
                                     <DocumentIcon v-else class="rounded-full h-6 w-6 px-1 bg-blue-200 text-white" />
-                                    {{ file.name }}
+                                    <div class="truncate w-full">{{ file.name }}</div>
+                                    <XCircleIcon @click="removeFile(index)" class="rounded-full h-8 w-8 px-1 bg-green-200 text-black"/>
                                 </div>
                             </li>
                         </ul>
@@ -61,7 +62,7 @@ import axios from 'axios';
 
 import PaperClipIcon from '@heroicons/vue/24/outline/PaperClipIcon';
 import PaperAirplaneIcon from '@heroicons/vue/24/outline/PaperAirplaneIcon';
-import { DocumentIcon } from "@heroicons/vue/24/outline";
+import { DocumentIcon, XCircleIcon } from "@heroicons/vue/24/outline";
 import { useToast } from 'vue-toastification';
 import { useRoute } from 'vue-router';
 import router from '../router/index.js';
@@ -71,51 +72,23 @@ const { proxy } = getCurrentInstance();
 const username = localStorage.getItem('username');
 const selectedFiles = ref([]);
 const conversationTitle = ref('');
+const conversationId = ref('');
 const userInput = ref('');
 const conversation_title = ref('');
+const conversation_id = ref('');
 const toast = useToast();
-const toastDeleteMethod = () => {
-    toast.info("Delete successfully", {
-        position: "top-center",
-        timeout: 1500,
-        closeOnClick: true,
-        icon: true,
-    });
+
+const handleClickTwoSteps = async () => {
+  await CreateConversation(); // 等待 CreateConversation 完成
+  await HandleUploadedFiles(); // 然后再执行 HandleUploadedFiles
 };
-const toastLoginErrorMethod = () => {
-    toast.error("Please login first", {
-        position: "top-center",
-        timeout: 3000,
-        closeOnClick: true,
-        icon: true,
-    });
+
+const removeFile = (index) => {
+  selectedFiles.value.splice(index, 1);
 };
+
 const toastSuccessMethod = () => {
     toast.info("Upload successfully", {
-        position: "top-center",
-        timeout: 1500,
-        closeOnClick: true,
-        icon: true,
-    });
-};
-const toastSuccessUploadMethod = () => {
-    toast.info("Upload File successfully", {
-        position: "top-center",
-        timeout: 1500,
-        closeOnClick: true,
-        icon: false,
-    });
-};
-const toastOpenErrorMethod = () => {
-    toast.error("Open failed", {
-        position: "top-center",
-        timeout: 1500,
-        closeOnClick: true,
-        icon: true,
-    });
-};
-const toastCreateMsgMethod = () => {
-    toast.success("Msg created!", {
         position: "top-center",
         timeout: 1500,
         closeOnClick: true,
@@ -130,19 +103,46 @@ const toastCreateSuccessMethod = () => {
         icon: true,
     });
 };
-// Handle file upload
-
+const toastCreateErrorNoMsgMethod = () => {
+    toast.error("Ask something first", {
+        position: "top-center",
+        timeout: 3000,
+        closeOnClick: true,
+        icon: true,
+    });
+};
+const toastCreateErrorNoFileMethod = () => {
+    toast.error("No File Upload", {
+        position: "top-center",
+        timeout: 3000,
+        closeOnClick: true,
+        icon: true,
+    });
+};
 
 const handleFileUpload = (event) => {
-    selectedFiles.value = Array.from(event.target.files);
+  const sFiles = Array.from(event.target.files); // 获取选中的文件
+  selectedFiles.value.push(...sFiles); // 将文件添加到 files 数组中，而不是替换
 };
 
 const HandleUploadedFiles = () => {
-    //file.value = event.target.files[0];
+    if (selectedFiles.value.length === 0) {
+        toastCreateErrorNoFileMethod();
+        return;
+    }
+    
+    if (userInput.value === '') {
+        toastCreateErrorNoMsgMethod();
+        return;
+    }
+    
     console.log(selectedFiles.value);
     console.log('Uploaded file:', selectedFiles);
     const username = localStorage.getItem('username');
     const conversationTitle = localStorage.getItem('conversationTitle');
+    const conversationId = localStorage.getItem('conversationId');
+    console.log("now id??", conversationId)
+    console.log(conversationTitle)
     // 使用FormData对象来构建文件上传的请求
     const formData = new FormData();
     //formData.append('file',file)
@@ -151,11 +151,12 @@ const HandleUploadedFiles = () => {
     });
     formData.append('username', username);
     formData.append('conversationTitle', conversationTitle);
+    formData.append('conversationId',conversationId);
     console.log(formData);
 
     axios.post(`${proxy.$apiBaseUrl}/api/upload/`, formData)
         .then(function (response) {
-            console.log('Server response:', response);
+            console.log('Server API upload response:', response);
             toastSuccessMethod();
         }
         )
@@ -168,6 +169,8 @@ const HandleUploadedFiles = () => {
             console.log('Server response:', response);
             alert(response.data.response);
             localStorage.setItem('conversationTitle', conversation_title.value);
+            localStorage.setItem('conversationId', conversation_id.value);
+            console.log("idid?:", conversation_id.value);
             console.log(conversation_title.value);
             router.push(`/base/conversation/${conversation_title.value}`);
 
@@ -180,24 +183,11 @@ const HandleUploadedFiles = () => {
         });
 };
 
-const createMessage = async (messageContent, messageRole) => {
-    try {
-        console.log("---------");
-        const conversationTitle = localStorage.getItem('conversationTitle');
-        console.log(conversationTitle);
-        const response = await axios.post(`${proxy.$apiBaseUrl}/api/createmessage/`, {
-            conversation_title: conversationTitle,
-            message_role: messageRole,
-            message_content: messageContent
-        });
-        console.log(response);
-        toastCreateMsgMethod();
-    } catch (error) {
-        console.log(error);
-    }
-};
-
 const CreateConversation = async () => {
+    if (selectedFiles.value.length === 0) {
+        toastCreateErrorNoFileMethod();
+        return;
+    }
     try {
         console.log("start create!!!!")
         let currentMsg = userInput.value;
@@ -214,7 +204,11 @@ const CreateConversation = async () => {
             }
         );
         console.log(response.data);
-        
+        console.log("conversation_id: ", response.data.conversation_id);
+        conversation_id.value = response.data.conversation_id;
+        localStorage.setItem('conversationId', conversation_id.value);
+        console.log("ls:", localStorage.getItem('conversationId'));
+
         if (response.data) {
             console.log("start create msg!!!");
             //createMessage(currentMsg, 'user');
@@ -227,29 +221,4 @@ const CreateConversation = async () => {
         console.log(error);
     }
 };
-const SaveConversationFile = async () => {
-    if (selectedFiles.value.length == 0) return;
-    try {
-        const formData = new FormData();
-
-        console.log(conversation_title.value);
-        formData.append('conversation_title', conversation_title.value);
-        selectedFiles.value.forEach(file => {
-            formData.append('files', file);
-        });
-        formData.append('username', username);
-        console.log(selectedFiles);
-        console.log(formData);
-        const response = await axios.post(`${proxy.$apiBaseUrl}/api/saveconversationfile/`, formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-        });
-        console.log(response);
-        toastSuccessUploadMethod();
-    } catch (error) {
-        console.log(error);
-    }
-};
-import { useRouter } from 'vue-router';
 </script>
